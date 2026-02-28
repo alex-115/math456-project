@@ -41,9 +41,9 @@ This activates Git integration and sets the correct working directory.
  7. Configure Git Identity (First Time Only)
 In the RStudio Terminal:
 
-git config --global user.name "Your Name"
+git config --global user.name Your_Name
 
-git config --global user.email "your_github_email@example.com"
+git config --global user.email your_github_email@example.com
 
 This ensures your commits are linked to your GitHub account.
 
@@ -53,6 +53,7 @@ You can now:
 • 	Use the Git tab to commit and push
 • 	Pull updates from teammates
 • 	Work inside a clean reproducible RStudio project environment
+
 
 
 
