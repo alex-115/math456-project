@@ -21,30 +21,32 @@ GitHub → Settings → SSH and GPG Keys → New SSH Key
 Paste the key and save.
 
  4. Clone the Repository
+Click on the green button in the top right corner - (<> Code)
 In RStudio:
 Tools → Terminal → New Terminal
 (or press Alt + Shift + R)
 Go to the directory where you want to clone the repo
 Run:
 git clone git@github.com:your_username/math456-project.git
-You can also clone using a normal system terminal. (found in the 
+You can also clone using a normal system terminal. 
 
- 5. Open the Project in RStudio
+ 6. Open the Project in RStudio
 In RStudio:
 File → Open Project…
 Navigate to the cloned folder and open the  file.
 This activates Git integration and sets the correct working directory.
 
- 6. Configure Git Identity (First Time Only)
+ 7. Configure Git Identity (First Time Only)
 In the RStudio Terminal:
 git config --global user.name "Your Name"
 git config --global user.email "your_github_email@example.com"
 This ensures your commits are linked to your GitHub account.
 
- 7. Start Working
+ 8. Start Working
 You can now:
 • 	Edit the file
 • 	Use the Git tab to commit and push
 • 	Pull updates from teammates
 • 	Work inside a clean reproducible RStudio project environment
+
 
