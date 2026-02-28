@@ -26,8 +26,8 @@ Tools → Terminal → New Terminal
 (or press Alt + Shift + R)
 Go to the directory where you want to clone the repo
 Run:
-git clone git@github.com:alex-115/math456-project.git
-You can also clone using a normal system terminal.
+git clone git@github.com:your_username/math456-project.git
+You can also clone using a normal system terminal. (found in the 
 
  5. Open the Project in RStudio
 In RStudio:
@@ -47,3 +47,4 @@ You can now:
 • 	Use the Git tab to commit and push
 • 	Pull updates from teammates
 • 	Work inside a clean reproducible RStudio project environment
+
