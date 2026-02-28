@@ -22,7 +22,7 @@ Paste the key and save.
 
  4. Clone the Repository
     
-Click on the green button in the top right corner - (<> Code)
+Click on the green button in the top right corner - (<> Code). Click on the ssh section.
 
 In RStudio:
 Tools → Terminal → New Terminal
@@ -50,6 +50,7 @@ You can now:
 • 	Use the Git tab to commit and push
 • 	Pull updates from teammates
 • 	Work inside a clean reproducible RStudio project environment
+
 
 
 
