@@ -9,9 +9,13 @@ CONFLICT (content): Merge conflict in analysis.Rmd
 Inside the file, you’ll see markers:
 
 <<<<<<< HEAD
+
 your version
+
 =======
+
 their version
+
 >>>>>>> origin/main
 
 
