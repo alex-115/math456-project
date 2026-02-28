@@ -22,6 +22,7 @@ Paste the key and save.
 
  4. Clone the Repository
 Click on the green button in the top right corner - (<> Code)
+
 In RStudio:
 Tools → Terminal → New Terminal
 (or press Alt + Shift + R)
@@ -48,5 +49,6 @@ You can now:
 • 	Use the Git tab to commit and push
 • 	Pull updates from teammates
 • 	Work inside a clean reproducible RStudio project environment
+
 
 
