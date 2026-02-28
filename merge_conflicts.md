@@ -7,6 +7,7 @@ CONFLICT (content): Merge conflict in analysis.Rmd
 
 
 Inside the file, you’ll see markers:
+
 <<<<<<< HEAD
 your version
 =======
@@ -19,6 +20,7 @@ You must choose which version to keep (or combine them).
  Steps to Fix a Merge Conflict
 1. Open the conflicted file
 Look for the conflict markers:
+
 <<<<<<< HEAD
 =======
 >>>>>>> 
