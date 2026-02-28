@@ -26,7 +26,9 @@ You must choose which version to keep (or combine them).
 Look for the conflict markers:
 
 <<<<<<< HEAD
+
 =======
+
 >>>>>>> 
 
 
