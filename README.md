@@ -8,7 +8,7 @@ This guide walks you through installing the required tools, setting up SSH acces
 • 	Install Git - [https://git-scm.com/install/](https://git-scm.com/install/)
 
  2. Create an SSH Key for GitHub
-Open a terminal (Git Bash or RStudio Terminal) and run:
+Open a terminal (Bash or RStudio Terminal) and run:
 ssh-keygen -t ed25519 -C "your_email@example.com"
 Press Enter three times unless you want a custom location or passphrase.
 
@@ -53,6 +53,7 @@ You can now:
 • 	Use the Git tab to commit and push
 • 	Pull updates from teammates
 • 	Work inside a clean reproducible RStudio project environment
+
 
 
 
