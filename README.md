@@ -13,14 +13,20 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 Press Enter three times unless you want a custom location or passphrase.
 
  3. Add Your SSH Key to GitHub
+    
 Show your public key:
+
 cat ~/.ssh/id_ed25519.pub
+
 Copy the output.
+
 Then go to:
+
 GitHub → Settings → SSH and GPG Keys → New SSH Key
+
 Paste the key and save.
 
- 4. Clone the Repository
+ 5. Clone the Repository
     
 Click on the green button in the top right corner - (<> Code). Click on the ssh section.
 
@@ -53,6 +59,7 @@ You can now:
 • 	Use the Git tab to commit and push
 • 	Pull updates from teammates
 • 	Work inside a clean reproducible RStudio project environment
+
 
 
 
