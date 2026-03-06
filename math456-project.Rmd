@@ -15,20 +15,18 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
-# testing
 library(tidyverse)
 df <- read_csv("Crime_Data_from_2020_to_2024_20260305.csv")
 ```
 
 ```{r}
-# Change the date format
+# Change the date format into POSIXct datetime
 df$`DATE OCC` <- as.POSIXct(df$`DATE OCC`, format = "%Y %b %d %I:%M:%S %p")
-
 ```
 
 
 ```{r}
-any(format(df$`DATE OCC`, "%Y") == "2026")
+readr::write_csv(df, "Fixed_Date_version.csv") 
 ```
 ## Including Plots
 
