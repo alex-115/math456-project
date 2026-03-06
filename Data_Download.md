@@ -10,7 +10,7 @@ git pull origin main (Our dataset will be in the repo)
 
 Make changes to the dataset
 
-git add Crime_Data_from_2020_to_2024_20260305.csv
+git add updated_Crime_Data_from_2020_to_2024_20260305.csv
 
 git commit -m "message"
 
