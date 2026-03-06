@@ -5,10 +5,15 @@
 # 2.) Run git LFS commands
 
 git lfs install
+
 git pull origin main (Our dataset will be in the repo)
+
 Make changes to the dataset
+
 git add Crime_Data_from_2020_to_2024_20260305.csv
+
 git commit -m "message"
+
 git push
 
 # You're all done now
