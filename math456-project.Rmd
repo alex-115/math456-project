@@ -24,10 +24,10 @@ df <- read_csv("Crime_Data_from_2020_to_2024_20260305.csv")
 df$`DATE OCC` <- as.POSIXct(df$`DATE OCC`, format = "%Y %b %d %I:%M:%S %p")
 ```
 
-
 ```{r}
 readr::write_csv(df, "Fixed_Date_version.csv") 
 ```
+
 ## Including Plots
 
 You can also embed plots, for example:
