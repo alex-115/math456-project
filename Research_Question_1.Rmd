@@ -1,0 +1,234 @@
+---
+title: "Research_Question_1"
+output: pdf_document
+date: "2026-03-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# The data should already be stored in the environment so this document assumes you already have it
+
+This chunk is responsible for printing the number of unique crime codes and their descriptions 
+```{r}
+library(readr)
+df <- read_csv("Fixed_Date_version.csv")
+
+#length(unique(df$`Crm Cd`)) # There is a total of 140 unique crime codes for part 1, this is useful for determining what crimes are considered violent
+
+unique_codes <- unique(df[, c("Crm Cd", "Crm Cd Desc")])
+
+unique_codes <- unique_codes[order(unique_codes$`Crm Cd`), ]
+
+unique_codes
+
+```
+
+
+Since each crime incident can have more than one incident where crm code 1 is the primary, crm code 2-4 are additional crime codes, we must examin to make sure the the additional crimes aren't also violent.
+
+```{r}
+# This checks if there are any na values for crm code 3, and all are na's. same thing with crm code 4. So we will only focus on crm code 2.
+cat("There is a total of", sum(!is.na(df$`Crm Cd 1`)), "Non NA values for Crm Cd 1 \n")
+cat("There is a total of", sum(!is.na(df$`Crm Cd 2`)), "Non NA values for Crm Cd 2 \n")
+cat("There is a total of", sum(!is.na(df$`Crm Cd 3`)), "Non NA values for Crm Cd 3 \n")
+cat("There is a total of", sum(!is.na(df$`Crm Cd 4`)), "Non NA values for Crm Cd 4 \n")
+
+unique_codes_2 <- sort(unique(df$`Crm Cd 2`))
+cat("Summary of unique codes in crime codes 2 section, \n")
+unique_codes_2
+```
+I just confirmed that only additional crime code 1 (primary) and 2 (secondary) slots contain crimes, while crime code 3 and 4 slots only have N/A values
+
+Now I will filter the data into a new csv file containing only the violent crimes
+```{r}
+library(stringr)
+library(lubridate)
+library(dplyr)
+
+violent_keywords <- c(
+  "HOMICIDE", "MANSLAUGHTER", "RAPE", "SEXUAL",
+  "ROBBERY", "ASSAULT", "BATTERY", "CHILD ABUSE", "DEADLY"
+)
+
+
+
+violent_codes_manual <- c(110, 113, 121, 122, 210, 220, 230, 231, 235, 236, 250, 251, 434, 435, 436, 437, 622, 623, 624, 625, 626, 627, 647, 753, 755, 756, 760, 761, 763, 810, 812, 815, 820, 821, 822, 860, 910, 920, 921, 922, 926, 928, 930, 940, 943)
+
+
+violent_codes_keyword <- df %>%
+  mutate(desc_upper = str_to_upper(`Crm Cd Desc`)) %>%
+  filter(str_detect(desc_upper, paste(violent_keywords, collapse = "|"))) %>%
+  pull(`Crm Cd`) %>%
+  unique()
+
+
+violent_codes <- union(violent_codes_manual, violent_codes_keyword)
+
+violent_df <- df %>%
+  filter(
+    `Crm Cd`   %in% violent_codes |
+    `Crm Cd 2` %in% violent_codes |
+    `Crm Cd 3` %in% violent_codes |
+    `Crm Cd 4` %in% violent_codes
+  ) %>%
+  mutate(year = year(`DATE OCC`))
+
+```
+
+Now we can begin analyzing
+1. Get the sum of violent crimes per year
+2. Trend analysis
+3. Fit a linear regression model
+4. Anova testing
+5. Visualizations
+
+
+
+1. Sum per year
+```{r}
+df_2020 <- violent_df %>% filter(year == 2020)
+df_2021 <- violent_df %>% filter(year == 2021)
+df_2022 <- violent_df %>% filter(year == 2022)
+df_2023 <- violent_df %>% filter(year == 2023)
+df_2024 <- violent_df %>% filter(year == 2024)
+
+sum_2020 <- nrow(df_2020)
+sum_2021 <- nrow(df_2021)
+sum_2022 <- nrow(df_2022)
+sum_2023 <- nrow(df_2023)
+sum_2024 <- nrow(df_2024)
+
+
+
+
+cat("Total violent crimes in 2020:", sum_2020, "\n")
+cat("Total violent crimes in 2021:", sum_2021, "\n")
+cat("Total violent crimes in 2022:", sum_2022, "\n")
+cat("Total violent crimes in 2023:", sum_2023, "\n")
+cat("Total violent crimes in 2024:", sum_2024, "\n")
+```
+There is a really low total number of violent crimes for 2024, hinting at an issue for 2024 data.
+
+Quick check of total crimes commited per year
+```{r}
+df_2 <- df
+cat("total crime in 2020:", nrow(df_2 %>% mutate(year = year(`DATE OCC`)) %>% filter(year == 2020)), "\n")
+cat("total crime in 2021:", nrow(df_2 %>% mutate(year = year(`DATE OCC`)) %>% filter(year == 2021)), "\n")
+cat("total crime in 2022:", nrow(df_2 %>% mutate(year = year(`DATE OCC`)) %>% filter(year == 2022)), "\n")
+cat("total crime in 2023:", nrow(df_2 %>% mutate(year = year(`DATE OCC`)) %>% filter(year == 2023)), "\n")
+cat("total crime in 2024:", nrow(df_2 %>% mutate(year = year(`DATE OCC`)) %>% filter(year == 2024)), "\n")
+cat("violent crimes in 2024:", sum_2024, "\n")
+
+```
+
+There is an issue with data inconsistency for 2024. I did some research and found that the crime reporting system changed in 2024 so there is a lack of data. So we won't take 2024 into the analysis as it will skew the analysis.
+
+2. Trend analysis
+```{r}
+# percentage change
+percentage <- ((71736 - 54259) / 54259) * 100
+cat("Rate change in violent crimes from 2020 to 2023:", percentage, "\n")
+cat("Total violent crime in 2020:", nrow(df_2020), "\n")
+cat("Total violent crime in 2023:", nrow(df_2023), "\n")
+
+# ((new - old) / old) * 100
+
+rate_2021 <- ((nrow(df_2021) - nrow(df_2020)) / nrow(df_2020)) * 100
+rate_2022 <- ((nrow(df_2022) - nrow(df_2021)) / nrow(df_2021)) * 100
+rate_2023 <- ((nrow(df_2023) - nrow(df_2022)) / nrow(df_2022)) * 100
+  
+average_rate <- sum((rate_2021 + rate_2022 + rate_2023)) / 3
+
+cat("Average rate percentage increase per year from 2020-2023", average_rate, "\n")
+```
+
+
+
+3. Fit a linear regression model
+where slope (positive = increasing violent crime)
+
+p‑value (is the trend statistically significant)
+
+R² (how much of the variation is explained by year)
+```{r}
+df_yearly <- violent_df %>%
+  mutate(year = year(`DATE OCC`)) %>%
+  filter(year != 2024) %>%
+  count(year, name = "violent_crime_count")
+
+model <- lm(violent_crime_count ~ year, data = df_yearly)
+summary(model)
+
+
+```
+Since the p-value is greater than 0.05, this means that the linear trend is not statistically significant, but this is primarly due to there being only 4 yearly observation, so this model doesn't have enough statistically power to declare the trend.
+This means 73% of the variation in yearly violent crime counts is explained by the year.
+The trend can't be declared statistically significant with the available data.
+
+So instead I will perform one-way ANOVA
+4. Anova testing on monthly basis
+```{r}
+df_monthly <- df %>%
+  mutate(year = year(`DATE OCC`),
+         month = month(`DATE OCC`)) %>%
+  filter(year %in% 2020:2023) %>%
+  count(year, month, name = "crime_count")
+
+df_monthly$year <- factor(df_monthly$year)
+
+anova_monthly <- aov(crime_count ~ year, data = df_monthly)
+summary(anova_monthly)
+
+TukeyHSD(anova_monthly)
+
+```
+Since F-test is signficant due to p < 0.05, A one‑way ANOVA showed a statistically significant effect of year on monthly violent‑crime counts from 2020 to 2023. This indicates that average monthly violent‑crime levels were not constant across years and that at least one year differed significantly from the others.
+
+TukeyHSD results shows which years differ. Post‑hoc Tukey comparisons revealed that 2021, 2022, and 2023 all had significantly higher monthly violent‑crime counts than 2020. The increase from 2021 to 2022 was also significant, while the difference between 2022 and 2023 was small and not statistically significant.
+
+
+5. Vizualization
+```{r}
+library(ggplot2)
+summary <- c(sum_2020, sum_2021, sum_2022, sum_2023)
+barplot(summary, names.arg = c(2020, 2021, 2022, 2023), main = "Total Violent Crimes by Year", ylab = "Crime Count")
+
+# Year‑over‑Year Change Plot
+ggplot(df_yearly, aes(year, violent_crime_count)) +
+  geom_line() +
+  geom_point() +
+   labs(title = "Yearly violent crime trend") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Anova Box plots for monthly
+
+boxplot(crime_count ~ year, data = df_monthly,
+        main = "Monthly Violent Crime by Year",
+        xlab = "Year", ylab = "Crime Count")
+
+```
+Graph 1) There is an increasing trend in crimes, as stated before. This is just a visual representation of this
+
+Graph 2) Same conclusions as graph 1, just a different visualization
+
+Graph 3) A box plot is a compressed summary of a distribution where each box shows the spread and center of monthly crime counts for a given year where the thick line inside the box is the median monthly crime count for that year. 2020 has a lower box, so lower crime levels. 2021-2023 have higher boxes so higher crime levels. 2022 has the highest box, so it has the highest monthly crime levels overall. The upward shift in the entire distribution across years visually supports the statistically significant differences found in the ANOVA and Tukey tests.
+
+
+Results summary
+
+1. The total count of violent crimes increase year by year.
+
+2. There is an approximately 32% increase in crimes from 2020 to 2023, implying that there is an average rate percentage increase of approximately 10% a year.
+
+3. The trend can't be declared statistically significant with yearly data.
+
+4. A one‑way ANOVA showed a statistically significant effect of year on monthly violent‑crime counts from 2020 to 2023
+
+5. The upward shift in the entire distribution across years visually supports the statistically significant differences identified.
+
+Conclusion
+
+There is a yearly upward trend in crimes, in the future it would be important to combine this data with real world situations that impact crimes such economy, education levels, media, presedntial status, etc..
+
