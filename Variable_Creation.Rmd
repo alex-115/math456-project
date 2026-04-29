@@ -1,0 +1,64 @@
+---
+title: "Variable_Creation"
+output: pdf_document
+date: "2026-04-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## Variable Creation
+
+The dataset used in this analysis, `Violent_Crimes.csv`, contains incidents classified as violent crimes based on LAPD crime codes. For this study, only variables relevant to the research questions were selected and, where necessary, transformed.
+
+To analyze trends over time, the variable `DATE.OCC` (date of occurrence) was used to create two derived variables: **year** and **month**. The year variable allows aggregation of violent crime counts across years for trend analysis, while the month variable supports more detailed examination of patterns within each year.
+
+To examine the geographic distribution of violent crime, the **reporting district number (`Rpt.Dist.No`)** was used as the primary variable for district-level analysis. Additionally, **area identifiers (`AREA` and `AREA.NAME`)** were used to provide more interpretable geographic labels in tables and visualizations.
+
+Descriptive variables were also included to summarize characteristics of the incidents, including **victim age (`Vict.Age`)**, **victim sex (`Vict.Sex`)**, and **victim descent (`Vict.Descent`)**. The **crime code (`Crm.Cd`)** and **crime description (`Crm.Cd.Desc`)** were used to identify the types of violent crimes.
+
+Finally, aggregated variables such as **total violent crimes per year** and **total violent crimes per reporting district** were computed to support statistical summaries and visualizations used in the analysis.
+
+```{r variable-creation}
+library(dplyr)
+library(lubridate)
+
+violent_crime_data <- read.csv("Violent_Crimes.csv")
+
+violent_crime_data <- violent_crime_data %>%
+  mutate(
+    DATE.OCC = as.Date(DATE.OCC),
+    year = year(DATE.OCC),
+    month = month(DATE.OCC, label = TRUE, abbr = TRUE)
+  )
+```
+
+```{r summaries}
+# Yearly totals
+yearly_crime <- violent_crime_data %>%
+  group_by(year) %>%
+  summarise(total_violent_crimes = n())
+
+yearly_crime
+
+# District totals
+district_crime <- violent_crime_data %>%
+  group_by(Rpt.Dist.No) %>%
+  summarise(total_violent_crimes = n()) %>%
+  arrange(desc(total_violent_crimes))
+
+head(district_crime, 10)
+```
+
+
+```{r}
+```
+
+

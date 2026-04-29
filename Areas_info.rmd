@@ -1,0 +1,44 @@
+AREAS
+Los Angeles Police Department resources - Wikipedia
+
+01 Central Police Station, 251 East 6th Street 90014
+
+02 Rampart Police Station, 1401 West 6th Street 90017
+
+03 Southwest Police Station, 1546 West Martin Luther King Jr. Boulevard 90062
+
+04 Hollenbeck Police Station, 2111 East 1st St 90033
+
+05 San Pedro Police Station, 2175 John S Gibson Boulevard 90731
+
+06 Hollywood Police Station, 1358 North Wilcox Avenue 90028
+
+07 Wilshire Police Station, 4861 West Venice Boulevard 90019
+
+08 West Los Angeles Police Station, 1663 South Butler Avenue 90025
+
+09 Van Nuys Police Station, 6240 Sylmar Avenue 91401
+
+10 West Valley Substation, 19020 Vanowen Street 91335
+
+11 Northeast Police Station, 3353 North San Fernando Road 90065
+
+12 77th Street Police Station,7600 South Broadway 90003
+
+13 Newton Street Police Station, 3400 South Central Ave 90011
+
+14 Pacific Police Station, 12312 West Culver Boulevard 90066
+
+15 North Hollywood Police Station, 11640 Burbank Boulevard 91601
+
+16 Foothill Police Station, 12760 Osborne Street 91331
+
+17 Devonshire Police Station, 10250 Etiwanda Avenue 91324
+
+18 Southeast Police Station, 145 West 108th Street 90061
+
+19 Mission Police Station, 11121 North Sepulveda Boulevard 91345
+
+20 Olympic Police Station, 1130 South Vermont Avenue 90006
+
+21 Topanga Police Station, 21501 Schoenborn Street 91304
