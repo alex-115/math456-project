@@ -24,6 +24,22 @@ df <- read_csv("Crime_Data_from_2020_to_2024_20260305.csv")
 df$`DATE OCC` <- as.POSIXct(df$`DATE OCC`, format = "%Y %b %d %I:%M:%S %p")
 ```
 
+
+```{r}
+# Convert TIME OCC to integer
+df$`TIME OCC` <- as.integer(df$`TIME OCC`)
+
+# Convert AREA to integer
+df$AREA <- as.integer(df$AREA)
+
+# Convert Rpt Dist No to integer
+df$`Rpt Dist No` <- as.integer(df$`Rpt Dist No`)
+
+# Convert Premis Cd to integer
+df$`Premis Cd` <- as.integer(df$`Premis Cd`)
+```
+
+
 ```{r}
 readr::write_csv(df, "Fixed_Date_version.csv") 
 ```
