@@ -3,8 +3,8 @@ title: "Data collection"
 output: pdf_document
 ---
 
-
 Victim representativeness
+
 ```{r}
 library(ggplot2)
 library(readr)
@@ -37,9 +37,8 @@ ggplot(subset_df, aes(x = `Vict Descent`)) +
 
 ```
 
-
-
 split data by year
+
 ```{r}
 df_2020 <- df[df$`DATE OCC` < as.POSIXct("2021-01-01"),]
 
@@ -53,6 +52,7 @@ df_2024 <- df[df$`DATE OCC` < as.POSIXct("2025-01-01") & df$`DATE OCC` >= as.POS
 ```
 
 Non response rates per year for age, sex and ethnicity
+
 ```{r}
 # Age non response rates
 age_rate_2020 <- sum(is.na(df_2020$`Vict Age`)) / nrow(df_2020)
@@ -100,58 +100,5 @@ cat("Non-response rate for race from 2022: ", race_rate_2022, "\n" )
 cat("Non-response rate for race from 2023: ", race_rate_2023, "\n" )
 cat("Non-response rate for race from 2024: ", race_rate_2024, "\n" )
 cat("Average Non-response rate per year for race", avg_race_rate, "\n")
-
-```
-
-Results - Information relevant in helping to answer research question one.
-
-```{r}
-# Understanding crime codes to identify violent crimes
-# Recall that crime codes 1 are primary, second is an additional secondary crime, third is an additional third crime, and fourth it fourth where every 1 is most violent and 4th is least
-number_of_crime_codes_1 <- length(unique(df$`Crm Cd`))
-number_of_crime_codes_2 <- length(unique(df$`Crm Cd 2`))
-number_of_crime_codes_3 <- length(unique(df$`Crm Cd 3`))
-number_of_crime_codes_4 <- length(unique(df$`Crm Cd 4`))
-
-cat("Unique crime codes in:", number_of_crime_codes_1, "\n")
-cat("Unique crime codes in:", number_of_crime_codes_2,"\n")
-cat("Unique crime codes in:", number_of_crime_codes_3, "\n")
-cat("Unique crime codes in:", number_of_crime_codes_4,"\n")
-cat("\n")
-violent_codes <- c(110, 113, 121, 122, 210, 220, 230, 231, 235, 236, 250, 251, 434, 435, 436, 437, 622, 623, 624, 625, 626, 627, 647, 753, 755, 756, 760, 761, 763, 810, 812, 815, 820, 821, 822, 860, 910, 920, 921, 922, 926, 928, 930, 940, 943)
-
-violent_df <- df[df$`Crm Cd` %in% violent_codes | df$`Crm Cd 2` %in% violent_codes, ]
-
-df_2020 <- violent_df[violent_df$`DATE OCC` < as.POSIXct("2021-01-01"),]
-
-df_2021 <- violent_df[violent_df$`DATE OCC` < as.POSIXct("2022-01-01") & violent_df$`DATE OCC` >= as.POSIXct("2021-01-01"),]
-
-df_2022 <- violent_df[violent_df$`DATE OCC` < as.POSIXct("2023-01-01") & violent_df$`DATE OCC` >= as.POSIXct("2022-01-01"),]
-
-df_2023 <- violent_df[violent_df$`DATE OCC` < as.POSIXct("2024-01-01") & violent_df$`DATE OCC` >= as.POSIXct("2023-01-01"),]
-
-df_2024 <- violent_df[violent_df$`DATE OCC` < as.POSIXct("2025-01-01") & violent_df$`DATE OCC` >= as.POSIXct("2024-01-01"),]
-
-sum_2020 <- nrow(df_2020)
-sum_2021 <- nrow(df_2021)
-sum_2022 <- nrow(df_2022)
-sum_2023 <- nrow(df_2023)
-sum_2024 <- nrow(df_2024)
-
-cat("Number of violent crimes for 2020:", sum_2020, "\n")
-cat("Number of violent crimes for 2021:", sum_2021, "\n")
-cat("Number of violent crimes for 2022:", sum_2022, "\n")
-cat("Number of violent crimes for 2023:", sum_2023, "\n")
-cat("Number of violent crimes for 2024:", sum_2024, "\n")
-cat("\n")
-
-# Area distribution
-
-ggplot(subset_df, aes(x = AREA)) +
-  geom_bar() + scale_x_continuous(breaks = seq(min(subset_df$`Vict Age`), max(subset_df$`Vict Age`), by = 3)) + labs(title = "Crime Counts per Area (2020–2024)")
-
-print("Table of crimes per area from 2020-2024")
-table(df$AREA)
-
 
 ```

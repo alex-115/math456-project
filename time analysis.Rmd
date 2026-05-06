@@ -1,0 +1,493 @@
+---
+title: "time analysis"
+author: "Cailin Wilson"
+date: "2026-05-04"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+)
+
+library(tidyverse)
+library(readr)
+library(lubridate)
+```
+
+Are certain types of crime more likely to occur at specific times of day or days of the week?
+
+```{r, warning = FALSE}
+df <- read_csv("Fixed_Date_version.csv")
+```
+
+```{r}
+unique_codes <- unique(df[, c("Crm Cd", "Crm Cd Desc")])
+
+unique_codes <- unique_codes[order(unique_codes$`Crm Cd`), ]
+
+violent_codes <- c(
+  110, 113, 121, 122, 210, 220, 230, 231, 235, 236,
+  250, 251, 434, 435, 436, 437, 622, 623, 624, 625,
+  626, 627, 647, 753, 755, 756, 760, 761, 763, 810,
+  812, 815, 820, 821, 822, 860, 910, 920, 921, 922,
+  926, 928, 930, 940, 943
+)
+
+violent_df <- df %>%
+  mutate(
+    crm_cd = as.numeric(`Crm Cd`)
+  ) %>%
+  filter(crm_cd %in% violent_codes)
+```
+
+```{r}
+violent_df <- violent_df %>%
+  mutate(
+    
+    # day of week
+    date_only = as.Date(`DATE OCC`),
+
+    weekday = wday(
+      date_only,
+      label = TRUE,
+      abbr = FALSE
+    ),
+
+    # hour of day from TIME OCC
+    time_chr = str_pad(
+      as.character(`TIME OCC`),
+      width = 4,
+      pad = "0"
+    ),
+
+    hour = as.numeric(
+      substr(time_chr, 1, 2)
+    )
+  )
+```
+
+```{r}
+day_counts <- violent_df %>%
+  count(weekday)
+
+ggplot(day_counts,
+       aes(x = weekday, y = n)) +
+  geom_col() +
+  labs(
+    title = "Violent Crimes by Day of Week",
+    x = "Day",
+    y = "Count"
+  )
+```
+
+```{r}
+day_max <- day_counts %>%
+  slice_max(n, n = 1)
+
+day_min <- day_counts %>%
+  slice_min(n, n = 1)
+
+cat(
+  "Highest:",
+  as.character(day_max$weekday),
+  "with",
+  day_max$n,
+  "violent crimes\n"
+)
+
+cat(
+  "Lowest:",
+  as.character(day_min$weekday),
+  "with",
+  day_min$n,
+  "violent crimes\n"
+)
+```
+
+```{r}
+heat_data <- violent_df %>%
+  count(weekday, hour)
+
+ggplot(
+  heat_data,
+  aes(
+    x = hour,
+    y = weekday,
+    fill = n
+  )
+) +
+  geom_tile() +
+  labs(
+    title = "Violent Crime Patterns by Day and Hour",
+    x = "Hour of Day",
+    y = "Day of Week",
+    fill = "Count"
+  )
+```
+
+```{r}
+peak_times <- violent_df %>%
+  count(weekday, hour) %>%
+  group_by(weekday) %>%
+  slice_max(n, n = 1) %>%
+  ungroup()
+
+peak_times
+```
+
+```{r}
+df_2020 <- df[df$`DATE OCC` < as.POSIXct("2021-01-01"),]
+
+df_2021 <- df[df$`DATE OCC` < as.POSIXct("2022-01-01") & df$`DATE OCC` >= as.POSIXct("2021-01-01"),]
+
+df_2022 <- df[df$`DATE OCC` < as.POSIXct("2023-01-01") & df$`DATE OCC` >= as.POSIXct("2022-01-01"),]
+
+df_2023 <- df[df$`DATE OCC` < as.POSIXct("2024-01-01") & df$`DATE OCC` >= as.POSIXct("2023-01-01"),]
+
+df_2024 <- df[df$`DATE OCC` < as.POSIXct("2025-01-01") & df$`DATE OCC` >= as.POSIXct("2024-01-01"),]
+```
+
+```{r}
+violent_df2 <- df %>%
+  mutate(
+    crm_cd = as.numeric(`Crm Cd`)
+  ) %>%
+  filter(crm_cd %in% violent_codes) %>%
+  mutate(
+    
+    date_only = as.Date(`DATE OCC`),
+
+    year = year(date_only),
+
+    month = month(
+      date_only,
+      label = TRUE,
+      abbr = FALSE
+    ),
+
+    weekday = wday(
+      date_only,
+      label = TRUE,
+      abbr = FALSE
+    )
+  )
+```
+
+```{r}
+year_counts <- violent_df2 %>%
+  count(year)
+
+ggplot(year_counts,
+       aes(x = factor(year), y = n)) +
+  geom_col() +
+  labs(
+    title = "Violent Crimes by Year",
+    x = "Year",
+    y = "Count"
+  )
+cat("2024 appears to have a lower crime rate due to missing data")
+```
+
+```{r}
+year_counts %>%
+  arrange(desc(n))
+```
+
+```{r}
+month_counts <- violent_df2 %>%
+  count(month)
+
+ggplot(month_counts,
+       aes(x = month, y = n)) +
+  geom_col() +
+  labs(
+    title = "Violent Crimes by Month",
+    x = "Month",
+    y = "Count"
+  )
+```
+
+```{r}
+peak_days_by_year <- violent_df2 %>%
+  count(year, weekday) %>%
+  group_by(year) %>%
+  slice_max(n, n = 1) %>%
+  ungroup()
+
+peak_days_by_year
+```
+
+```{r}
+lowest_days_by_year <- violent_df2 %>%
+  count(year, weekday) %>%
+  group_by(year) %>%
+  slice_min(n, n = 1) %>%
+  ungroup()
+
+lowest_days_by_year
+```
+
+```{r}
+heat_year_day <- violent_df2 %>%
+  count(year, weekday)
+
+ggplot(
+  heat_year_day,
+  aes(
+    x = factor(year),
+    y = weekday,
+    fill = n
+  )
+) +
+  geom_tile() +
+  labs(
+    title = "Violent Crime by Year and Weekday",
+    x = "Year",
+    y = "Day",
+    fill = "Count"
+  )
+```
+
+```{r}
+weekday_year_table <- table(
+  violent_df2$weekday,
+  violent_df2$year
+)
+
+chisq.test(weekday_year_table)
+```
+
+A Pearson's chi-squared test was conducted to examine whether the distribution of violent crimes across days of the week differed by year in Los Angeles. Results indicated a statistically significant association between year and day of week, $\chi$ 2 (24)=60.97,p\<0.001, suggesting that while overall weekday crime patterns remained relatively consistent, the magnitude of violent crime across specific weekdays varied significantly across years.
+
+```{r}
+chi_result <- chisq.test(weekday_year_table)
+
+chi2 <- as.numeric(chi_result$statistic)
+
+n <- sum(weekday_year_table)
+
+r <- nrow(weekday_year_table)
+
+c <- ncol(weekday_year_table)
+
+cramers_v <- sqrt(
+  chi2 / (n * min(r - 1, c - 1))
+)
+
+cramers_v
+```
+
+Although weekday crime distributions differed significantly across years (p\<.001), the effect size was small, suggesting that temporal violent crime patterns in Los Angeles remained relatively stable over time.
+
+```{r}
+top_districts <- c(645, 1249, 1822, 119)
+
+time_location_df <- violent_df %>%
+ filter(`Rpt Dist No` %in% top_districts) %>%
+ count(`Rpt Dist No`, hour)
+
+```
+
+```{r}
+peak_points <- time_location_df %>%
+  group_by(`Rpt Dist No`) %>%
+  slice_max(n, n = 1)
+
+ggplot(
+  time_location_df,
+  aes(
+    x = hour,
+    y = n,
+    color = factor(`Rpt Dist No`)
+  )
+) +
+  geom_line(size = 1) +
+  geom_point(
+    data = peak_points,
+    size = 3
+  ) +
+  labs(
+    title = "Hourly Violent Crime Patterns by Reporting District",
+    x = "Hour of Day",
+    y = "Violent Crime Count",
+    color = "District"
+  )
+```
+
+```{r}
+district_extremes <- time_location_df %>%
+  group_by(`Rpt Dist No`) %>%
+  summarise(
+    peak_hour = hour[which.max(n)],
+    peak_count = max(n),
+
+    low_hour = hour[which.min(n)],
+    low_count = min(n)
+  )
+
+district_extremes
+```
+
+```{r}
+heat_location <- violent_df %>%
+ count(`AREA NAME`, weekday, hour)
+ggplot(
+ heat_location,
+ aes(
+   x = hour,
+   y = weekday,
+   fill = n
+ )
+) +
+ geom_tile() +
+ facet_wrap(~ `AREA NAME`)
+
+```
+
+```{r}
+area_extremes <- heat_location %>%
+  group_by(`AREA NAME`) %>%
+  summarise(
+    peak_day = weekday[which.max(n)],
+    peak_hour = hour[which.max(n)],
+    peak_count = max(n),
+
+    low_day = weekday[which.min(n)],
+    low_hour = hour[which.min(n)],
+    low_count = min(n)
+  )
+
+area_extremes
+```
+
+```{r}
+top_hotspots <- heat_location %>%
+  arrange(desc(n)) %>%
+  slice(1:5)
+
+top_hotspots
+```
+
+```{r}
+year_daily <- violent_df2 %>%
+  count(year, date_only) %>%
+  group_by(year) %>%
+  summarise(
+    avg_daily_crime = mean(n)
+  )
+
+ggplot(
+  year_daily,
+  aes(
+    x = factor(year),
+    y = avg_daily_crime
+  )
+) +
+  geom_col() +
+  labs(
+    title = "Average Daily Violent Crimes by Year",
+    x = "Year",
+    y = "Average Daily Violent Crimes"
+  )
+```
+
+```{r}
+year_counts <- violent_df2 %>%
+  count(year)
+
+ggplot(
+  year_counts,
+  aes(
+    x = year,
+    y = n
+  )
+) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = TRUE)
+```
+
+```{r}
+year_model <- lm(n ~ year, data = year_counts)
+
+summary(year_model)
+```
+
+```{r}
+top_areas <- c(
+  "77th Street",
+  "Central",
+  "Hollywood",
+  "Newton",
+  "Southeast"
+)
+
+heat_top <- violent_df %>%
+  filter(`AREA NAME` %in% top_areas) %>%
+  count(`AREA NAME`, weekday, hour)
+
+ggplot(
+  heat_top,
+  aes(
+    x = hour,
+    y = weekday,
+    fill = n
+  )
+) +
+  geom_tile() +
+  facet_wrap(~ `AREA NAME`)
+```
+
+```{r}
+heat_location <- violent_df %>%
+  count(`AREA NAME`, weekday, hour)
+
+top_areas <- violent_df %>%
+  count(`AREA NAME`, sort = TRUE) %>%
+  slice(1:4) %>%
+  pull(`AREA NAME`)
+
+heat_location_top <- violent_df %>%
+  filter(`AREA NAME` %in% top_areas) %>%
+  count(`AREA NAME`, weekday, hour)
+```
+
+```{r}
+ggplot(
+  heat_location_top,
+  aes(
+    x = hour,
+    y = weekday,
+    fill = n
+  )
+) +
+  geom_tile() +
+  facet_wrap(
+    ~ `AREA NAME`,
+    ncol = 2
+  ) +
+  labs(
+    title = "Violent Crime Patterns in Top Hotspot Areas",
+    x = "Hour of Day",
+    y = "Day of Week"
+  )
+```
+
+```{r}
+area_extremes <- heat_location_top %>%
+  group_by(`AREA NAME`) %>%
+  summarise(
+    peak_day = weekday[which.max(n)],
+    peak_hour = hour[which.max(n)],
+    peak_count = max(n),
+
+    low_day = weekday[which.min(n)],
+    low_hour = hour[which.min(n)],
+    low_count = min(n)
+  )
+
+area_extremes
+```
