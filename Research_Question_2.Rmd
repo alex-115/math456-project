@@ -1,0 +1,284 @@
+---
+title: "Research Question 2: Violent Crime by Reporting District in Los Angeles"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Research Question 2
+
+## Which areas in Los Angeles experience the highest rates of violent crime per district (Rpt Dist No), and how are these patterns distributed?
+
+This analysis examines the geographic distribution of violent crime across Los Angeles reporting districts (`Rpt Dist No`).
+
+Because population by reporting district is not available, the rate used in this analysis is defined as:
+
+**violent crimes per 1,000 total reported crimes within each reporting district**
+
+## Load libraries
+
+```{r libraries}
+library(readr)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(knitr)
+library(scales)
+```
+
+## Load datasets
+
+```{r load-data}
+# Full dataset of all reported crimes
+all_crime_df <- read_csv("Fixed_Date_version.csv")
+
+# Dataset already filtered to violent crimes
+violent_df <- read_csv("Violent_Crimes.csv")
+```
+
+## Clean date columns
+
+```{r clean-dates}
+if (!inherits(all_crime_df$`DATE OCC`, "POSIXct") && !inherits(all_crime_df$`DATE OCC`, "Date")) {
+  all_crime_df$`DATE OCC` <- parse_date_time(
+    all_crime_df$`DATE OCC`,
+    orders = c("Y b d I:M:S p", "Y-m-d H:M:S", "m/d/Y H:M", "m/d/Y I:M:S p")
+  )
+}
+
+if (!inherits(violent_df$`DATE OCC`, "POSIXct") && !inherits(violent_df$`DATE OCC`, "Date")) {
+  violent_df$`DATE OCC` <- parse_date_time(
+    violent_df$`DATE OCC`,
+    orders = c("Y b d I:M:S p", "Y-m-d H:M:S", "m/d/Y H:M", "m/d/Y I:M:S p")
+  )
+}
+```
+
+## Analysis from 2020–2023
+
+```{r filter-years}
+all_crime_df <- all_crime_df %>%
+  mutate(year = year(`DATE OCC`)) %>%
+  filter(year %in% 2020:2023)
+
+violent_df <- violent_df %>%
+  mutate(year = year(`DATE OCC`)) %>%
+  filter(year %in% 2020:2023)
+```
+
+## Compute district-level totals and rates
+
+- total number of crimes
+- total number of violent crimes
+- violent crime rate per 1,000 crimes
+- percent of crimes that are violent
+
+```{r district-summary}
+district_total <- all_crime_df %>%
+  group_by(`Rpt Dist No`, `AREA NAME`) %>%
+  summarise(
+    total_crime_count = n(),
+    .groups = "drop"
+  )
+
+district_violent <- violent_df %>%
+  group_by(`Rpt Dist No`, `AREA NAME`) %>%
+  summarise(
+    violent_count = n(),
+    .groups = "drop"
+  )
+
+district_summary <- district_total %>%
+  left_join(district_violent, by = c("Rpt Dist No", "AREA NAME")) %>%
+  mutate(
+    violent_count = ifelse(is.na(violent_count), 0, violent_count),
+    violent_rate_per_1000 = (violent_count / total_crime_count) * 1000,
+    violent_percent = (violent_count / total_crime_count) * 100
+  ) %>%
+  arrange(desc(violent_rate_per_1000))
+
+kable(
+  head(district_summary, 15),
+  digits = 2,
+  caption = "Top 15 Reporting Districts by Violent Crime Rate"
+)
+```
+
+## Top districts
+
+```{r top-districts}
+top10_rate <- district_summary %>%
+  slice_max(order_by = violent_rate_per_1000, n = 10)
+
+top10_count <- district_summary %>%
+  slice_max(order_by = violent_count, n = 10)
+
+kable(top10_rate, digits = 2, caption = "Top 10 Districts by Violent Crime Rate")
+kable(top10_count, digits = 2, caption = "Top 10 Districts by Violent Crime Count")
+```
+
+## Area-level summary
+
+```{r area-summary}
+area_summary <- district_summary %>%
+  group_by(`AREA NAME`) %>%
+  summarise(
+    total_violent_crimes = sum(violent_count, na.rm = TRUE),
+    total_crimes = sum(total_crime_count, na.rm = TRUE),
+    avg_district_rate_per_1000 = mean(violent_rate_per_1000, na.rm = TRUE),
+    median_district_rate_per_1000 = median(violent_rate_per_1000, na.rm = TRUE),
+    district_count = n(),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    area_violent_rate_per_1000 = (total_violent_crimes / total_crimes) * 1000
+  ) %>%
+  arrange(desc(area_violent_rate_per_1000))
+
+kable(area_summary, digits = 2, caption = "Violent Crime Summary by LAPD Area")
+```
+
+## Visualization 1: Top 10 districts by violent crime rate
+
+```{r plot-rate, fig.width=10, fig.height=6}
+ggplot(
+  top10_rate,
+  aes(x = reorder(as.factor(`Rpt Dist No`), violent_rate_per_1000),
+      y = violent_rate_per_1000,
+      fill = `AREA NAME`)
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top 10 Reporting Districts by Violent Crime Rate",
+    x = "Reporting District (Rpt Dist No)",
+    y = "Violent crimes per 1,000 total crimes",
+    fill = "Area"
+  ) +
+  theme_minimal()
+```
+
+## Visualization 2: Top 10 districts by violent crime count
+
+```{r plot-count, fig.width=10, fig.height=6}
+ggplot(
+  top10_count,
+  aes(x = reorder(as.factor(`Rpt Dist No`), violent_count),
+      y = violent_count,
+      fill = `AREA NAME`)
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top 10 Reporting Districts by Violent Crime Count",
+    x = "Reporting District (Rpt Dist No)",
+    y = "Violent crime count",
+    fill = "Area"
+  ) +
+  theme_minimal()
+```
+
+## Visualization 3: Distribution of district violent crime rates
+
+```{r plot-distribution, fig.width=9, fig.height=5}
+ggplot(district_summary, aes(x = violent_rate_per_1000)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "white") +
+  labs(
+    title = "Distribution of Violent Crime Rates Across Reporting Districts",
+    x = "Violent crimes per 1,000 total crimes",
+    y = "Number of districts"
+  ) +
+  theme_minimal()
+```
+
+## Visualization 4: Violent crime rate by area
+
+```{r plot-area, fig.width=10, fig.height=6}
+ggplot(
+  area_summary,
+  aes(x = reorder(`AREA NAME`, area_violent_rate_per_1000),
+      y = area_violent_rate_per_1000)
+) +
+  geom_col(fill = "firebrick") +
+  coord_flip() +
+  labs(
+    title = "Violent Crime Rate by LAPD Area",
+    x = "LAPD Area",
+    y = "Violent crimes per 1,000 total crimes"
+  ) +
+  theme_minimal()
+```
+
+## Spatial distribution
+
+This map is an approximate spatial summary using the median latitude and longitude of violent incidents within each district.
+
+It is not a true district boundary map, but it helps show how high-violence districts are distributed geographically.
+
+```{r map-data}
+district_locations <- violent_df %>%
+  filter(!is.na(LAT), !is.na(LON), LAT != 0, LON != 0) %>%
+  group_by(`Rpt Dist No`) %>%
+  summarise(
+    median_lat = median(LAT, na.rm = TRUE),
+    median_lon = median(LON, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+district_map <- district_summary %>%
+  left_join(district_locations, by = "Rpt Dist No")
+```
+
+## Visualization 5: Approximate district map
+
+```{r map-plot, fig.width=9, fig.height=7}
+ggplot(
+  district_map %>% filter(!is.na(median_lat), !is.na(median_lon)),
+  aes(x = median_lon, y = median_lat,
+      size = violent_count, color = violent_rate_per_1000)
+) +
+  geom_point(alpha = 0.75) +
+  coord_quickmap(xlim = c(-118.7, -117.9), ylim = c(33.7, 34.4)) +
+  labs(
+    title = "Approximate Spatial Distribution of Violent Crime by Reporting District",
+    x = "Longitude",
+    y = "Latitude",
+    size = "Violent count",
+    color = "Rate per 1,000"
+  ) +
+  theme_minimal()
+```
+
+## Key results
+
+```{r key-results}
+highest_rate_district <- district_summary %>% slice_max(violent_rate_per_1000, n = 1)
+highest_count_district <- district_summary %>% slice_max(violent_count, n = 1)
+highest_area <- area_summary %>% slice_max(area_violent_rate_per_1000, n = 1)
+
+cat("District with the highest violent crime rate:\n")
+print(highest_rate_district)
+
+cat("\nDistrict with the highest violent crime count:\n")
+print(highest_count_district)
+
+cat("\nArea with the highest violent crime rate:\n")
+print(highest_area)
+```
+
+## Results summary
+
+The analysis shows that violent crime is not evenly distributed across Los Angeles reporting districts. Instead, violent crime is concentrated in a smaller number of districts and areas.
+
+Districts with the highest violent crime rate are not always the same districts with the highest violent crime count. This means that some districts have a larger share of violent crime relative to all reported crime, even if their total violent incident count is not the highest overall.
+
+At the area level, some LAPD areas contain multiple districts with relatively high violent-crime rates, indicating geographic clustering.
+
+The bar charts and histogram show that district-level violent crime varies substantially across Los Angeles, while the spatial point map shows that these high-rate districts are concentrated in particular locations rather than spread evenly across the city.
+
+## Conclusion
+
+Using violent crimes per 1,000 total crimes as the district-level rate measure, the results show that violent crime is spatially concentrated rather than evenly distributed. Some reporting districts consistently stand out as higher-risk districts, and some LAPD areas contain multiple high-rate districts.

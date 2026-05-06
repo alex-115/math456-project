@@ -1,0 +1,92 @@
+---
+title: "Violent Crime Rate Per District"
+author: "Cailin Wilson"
+date: "2026-04-16"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(dplyr)
+library(tidycensus)
+library(tidyverse)
+library(readxl)
+library(tmap)
+library(tmaptools)
+library(tigris)
+library(sf) 
+library(mapview)
+library(spatstat)
+library(rspat)
+```
+
+filter to only violent crime:
+```{r}
+violent_data <- violent_df %>%
+  filter(!is.na(LAT), !is.na(LON)) %>%
+  filter(
+    str_detect(
+      `Crm Cd Desc`,
+      regex(paste(violent_keywords, collapse = "|"), ignore_case = TRUE)
+    )
+  )
+```
+
+
+count per district:
+```{r}
+violent_by_district <- violent_data %>%
+  group_by(`Rpt Dist No`) %>%
+  summarise(
+    violent_count = n(),
+    avg_lat = mean(LAT, na.rm = TRUE),
+    avg_lon = mean(LON, na.rm = TRUE)
+  ) %>%
+  ungroup()
+```
+
+
+convert to spacial using sf library:
+```{r}
+violent_sf <- violent_by_district %>%
+  st_as_sf(coords = c("avg_lon", "avg_lat"), crs = 4326)
+```
+
+
+option #1, IDK why the values are outside of LA county
+```{r}
+mapview(violent_sf, zcol = "violent_count")
+```
+
+
+option #2, I don't know how to fix the legend
+```{r}
+la_bbox <- st_bbox(c(
+  xmin = -118.7,
+  xmax = -117.9,
+  ymin = 33.7,
+  ymax = 34.4
+), crs = st_crs(4326))
+
+tm_shape(violent_sf, bbox = la_bbox) +
+  tm_basemap("OpenStreetMap") +
+  tm_dots(
+    col = "violent_count",
+    size = "violent_count",
+    palette = "Reds"
+  ) +
+  tm_layout(
+    title = "Violent Crime by Reporting District (LA)",
+    legend.outside = TRUE,
+    component.autoscale = FALSE
+  )
+```
+
+
+
+
+
+
+
+
