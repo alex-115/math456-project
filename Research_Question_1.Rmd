@@ -41,7 +41,8 @@ unique_codes_2
 ```
 I just confirmed that only additional crime code 1 (primary) and 2 (secondary) slots contain crimes, while crime code 3 and 4 slots only have N/A values
 
-Now I will filter the data into a new csv file containing only the violent crimes
+Now I will filter the data into a new csv file containing only the violent crimes - https://ucr.fbi.gov/crime-in-the-u.s/2010/crime-in-the-u.s.-2010/violent-crime
+
 ```{r}
 library(stringr)
 library(lubridate)
@@ -163,13 +164,15 @@ summary(model)
 
 
 ```
-Since the p-value is greater than 0.05, this means that the linear trend is not statistically significant, but this is primarly due to there being only 4 yearly observation, so this model doesn't have enough statistically power to declare the trend.
+Since the p-value is greater than 0.05, this means that the linear trend is not statistically significant, but this is primarily due to there being only 4 yearly observation, so this model doesn't have enough statistically power to declare the trend.
 This means 73% of the variation in yearly violent crime counts is explained by the year.
 The trend can't be declared statistically significant with the available data.
 
 So instead I will perform one-way ANOVA
 4. Anova testing on monthly basis
 ```{r}
+library(rstatix)
+
 df_monthly <- df %>%
   mutate(year = year(`DATE OCC`),
          month = month(`DATE OCC`)) %>%
@@ -180,8 +183,10 @@ df_monthly$year <- factor(df_monthly$year)
 
 anova_monthly <- aov(crime_count ~ year, data = df_monthly)
 summary(anova_monthly)
-
 TukeyHSD(anova_monthly)
+
+anova_test_monthly <- df_monthly %>% anova_test(crime_count ~ year)
+get_anova_table(anova_test_monthly)
 
 ```
 Since F-test is signficant due to p < 0.05, A one‑way ANOVA showed a statistically significant effect of year on monthly violent‑crime counts from 2020 to 2023. This indicates that average monthly violent‑crime levels were not constant across years and that at least one year differed significantly from the others.
