@@ -41,7 +41,7 @@ unique_codes_2
 ```
 I just confirmed that only additional crime code 1 (primary) and 2 (secondary) slots contain crimes, while crime code 3 and 4 slots only have N/A values
 
-Now I will filter the data into a new csv file containing only the violent crimes - https://ucr.fbi.gov/crime-in-the-u.s/2010/crime-in-the-u.s.-2010/violent-crime
+Now I will filter the data into a new csv file containing only the violent crimes - FBI definition: https://ucr.fbi.gov/crime-in-the-u.s/2010/crime-in-the-u.s.-2010/violent-crime
 
 ```{r}
 library(stringr)
