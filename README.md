@@ -1,6 +1,13 @@
 # math456-project
 This repo contains the files used in our research project
-Github.md is a markdown file listing some useful GitHub commands, merge_conflicts.md is a markdown file listing how to handle merge conflicts. We will be primarily working on the math456-project.Rmd
+
+Files for research question 1: Research_Question_1.Rmd and Research_Question_1.pdf
+
+Files for research question 2: Research_Question_2.Rmd, Research_Question_2.pdf, and Research_Question_2.log
+
+Files for research question 3: time analysis.Rmd, time-analysis.pdf
+
+Github.md is a markdown file listing some useful GitHub commands, merge_conflicts.md is a markdown file listing how to handle merge conflicts.
 This guide walks you through installing the required tools, setting up SSH access to GitHub, cloning the repository, and opening the project correctly in RStudio.
 
  1. Install Required Software
